@@ -24,12 +24,12 @@ export async function saveState(timestamp: string): Promise<void> {
   await writeFile(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
 }
 
-export async function getNewFiles(projectsDir: string): Promise<string[]> {
+export async function getNewFiles(projectsDir: string, projectFilter?: string | null): Promise<string[]> {
   const state = await loadState();
   const lastSync = state ? new Date(state.lastSyncTimestamp).getTime() : 0;
 
   const allFiles: string[] = [];
-  await scanDirectory(projectsDir, allFiles);
+  await scanDirectory(projectsDir, allFiles, projectFilter);
 
   if (lastSync === 0) {
     return allFiles;
@@ -46,7 +46,7 @@ export async function getNewFiles(projectsDir: string): Promise<string[]> {
   return newFiles;
 }
 
-async function scanDirectory(dir: string, results: string[]): Promise<void> {
+async function scanDirectory(dir: string, results: string[], projectFilter?: string | null, depth = 0): Promise<void> {
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
@@ -58,8 +58,11 @@ async function scanDirectory(dir: string, results: string[]): Promise<void> {
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
-      // Recurse into subdirectories (including subagents/)
-      await scanDirectory(fullPath, results);
+      // At top level, apply project filter if configured
+      if (depth === 0 && projectFilter && !entry.name.startsWith(projectFilter)) {
+        continue;
+      }
+      await scanDirectory(fullPath, results, projectFilter, depth + 1);
     } else if (entry.isFile() && entry.name.endsWith(".jsonl")) {
       results.push(fullPath);
     }

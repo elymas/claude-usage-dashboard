@@ -8,6 +8,7 @@ export interface CollectorConfig {
   apiKey: string;
   supabaseUrl: string;
   functionUrl: string;
+  projectFilter?: string;
 }
 
 const CONFIG_DIR = join(homedir(), ".claude-collector");

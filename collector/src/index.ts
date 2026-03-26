@@ -39,7 +39,8 @@ async function main(): Promise<void> {
 
   // 4. Get new JSONL files
   const projectsDir = join(homedir(), ".claude", "projects");
-  const files = await getNewFiles(projectsDir);
+  const projectFilter = config.projectFilter ?? null;
+  const files = await getNewFiles(projectsDir, projectFilter);
 
   if (files.length === 0) {
     console.log("[collector] No new files to process.");

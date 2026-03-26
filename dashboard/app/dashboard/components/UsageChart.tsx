@@ -53,7 +53,7 @@ export default function UsageChart({ usage, profiles }: Props) {
         colors={COLORS.slice(0, categories.length)}
         stack
         className="h-72"
-        yAxisWidth={60}
+        yAxisWidth={80}
         valueFormatter={formatTokens}
       />
     </div>
