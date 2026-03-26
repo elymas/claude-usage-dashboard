@@ -6,7 +6,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -14,16 +14,16 @@ export default function AuthCallbackPage() {
     const code = url.searchParams.get("code");
 
     if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          setError(true);
-          setTimeout(() => router.push("/login"), 2000);
+      supabase.auth.exchangeCodeForSession(code).then(({ error: authError }) => {
+        if (authError) {
+          setError(authError.message);
+          setTimeout(() => router.push("/login"), 3000);
         } else {
           router.push("/dashboard");
         }
       });
     } else {
-      // Implicit flow fallback: check if session exists from URL hash
+      // Implicit flow: session may be detected from URL hash automatically
       supabase.auth.getSession().then(({ data: { session } }) => {
         router.push(session ? "/dashboard" : "/login");
       });
@@ -33,9 +33,10 @@ export default function AuthCallbackPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-red-600">
-          Authentication failed. Redirecting to login...
-        </p>
+        <div className="text-center">
+          <p className="text-sm text-red-600">Authentication failed: {error}</p>
+          <p className="mt-2 text-xs text-gray-400">Redirecting to login...</p>
+        </div>
       </div>
     );
   }
