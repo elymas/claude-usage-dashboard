@@ -9,7 +9,7 @@
 ```
 ┌──────────────┐     ┌─────────────────────┐     ┌──────────────────┐
 │  Collector    │────▶│  Supabase           │◀────│  Dashboard       │
-│  (각 팀원 PC) │     │  Edge Function + DB │     │  (Next.js/Vercel)│
+│  (각 팀원 PC) │     │  Edge Function + DB │     │(Next.js/GH Pages)│
 └──────────────┘     └─────────────────────┘     └──────────────────┘
   JSONL 파싱            daily_usage 저장           차트, 테이블, CSV
   일별 집계             API Key 인증               Magic Link 로그인
@@ -145,15 +145,27 @@ pnpm --filter @usage-dashboard/collector test
 
 ## Deployment
 
-GitHub Actions (`.github/workflows/deploy.yml`)가 CI/CD를 처리합니다:
+GitHub Actions (`.github/workflows/deploy.yml`)가 GitHub Pages로 자동 배포합니다:
 
 1. `main` 브랜치 push/PR 시 Collector 테스트 실행
-2. 테스트 통과 후 Vercel에 Dashboard 자동 배포
+2. 테스트 통과 후 `next build` → 정적 파일(`dashboard/out/`) 생성 → GitHub Pages 배포
+
+### GitHub Pages 설정
+
+1. GitHub 레포지토리 Settings → Pages → Source를 **GitHub Actions**로 설정
+2. Repository Secrets에 환경 변수 추가:
 
 필요한 GitHub Secrets:
-- `VERCEL_TOKEN`
-- `VERCEL_ORG_ID`
-- `VERCEL_PROJECT_ID`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### Supabase Auth 리다이렉트 URL 설정
+
+Supabase Dashboard → Authentication → URL Configuration에서 Redirect URLs에 GitHub Pages 도메인을 추가하세요:
+
+```
+https://<username>.github.io/<repo-name>/auth/callback
+```
 
 ## Environment Variables
 
