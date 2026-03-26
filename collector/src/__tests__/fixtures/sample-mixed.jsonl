@@ -1,0 +1,4 @@
+{"type":"assistant","message":{"model":"claude-sonnet-4-20250514","content":"Hello"},"timestamp":"2025-03-20T10:00:00.000Z"}
+{"type":"assistant","message":{"model":"claude-sonnet-4-20250514","usage":{"input_tokens":0,"output_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}},"timestamp":"2025-03-20T11:00:00.000Z"}
+{"type":"progress","message":{"content":"Processing..."},"timestamp":"2025-03-20T10:05:00.000Z"}
+{"type":"file-history-snapshot","files":["/src/index.ts"],"timestamp":"2025-03-20T10:10:00.000Z"}

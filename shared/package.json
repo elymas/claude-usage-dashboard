@@ -1,0 +1,6 @@
+{
+  "name": "@usage-dashboard/shared",
+  "private": true,
+  "main": "./types.ts",
+  "types": "./types.ts"
+}

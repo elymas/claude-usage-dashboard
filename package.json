@@ -1,0 +1,5 @@
+{
+  "name": "usage-dashboard",
+  "private": true,
+  "workspaces": ["collector", "dashboard", "shared"]
+}
