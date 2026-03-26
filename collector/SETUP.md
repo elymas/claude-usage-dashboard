@@ -131,35 +131,120 @@ cat ~/.claude-collector/collector.error.log
 
 새 팀원을 추가하려면 다음 순서로 진행합니다.
 
-### 1. Supabase Auth에 사용자 생성
+### 사전 준비: Supabase CLI 설치 및 로그인
 
-Supabase Dashboard → Authentication → Users → **Add user** → 팀원 이메일 입력
-
-또는 팀원이 대시보드(https://elymas.github.io/claude-usage-dashboard/)에서 직접 Magic Link 로그인하면 자동으로 Auth 사용자가 생성됩니다.
-
-### 2. profiles 테이블에 등록
-
-Supabase CLI로 실행:
+Supabase CLI가 설치되어 있지 않다면 먼저 설치합니다.
 
 ```bash
-# 1. 사용자 ID 조회
-supabase db query --linked \
-  "SELECT id, email FROM auth.users WHERE email = '팀원이메일@example.com';"
+# macOS (Homebrew)
+brew install supabase/tap/supabase
 
-# 2. 프로필 등록
+# 로그인 (브라우저에서 Supabase 계정 인증)
+supabase login
+
+# 프로젝트 연결 (usage-dashboard 레포 루트에서 실행)
+cd claude-usage-dashboard
+supabase link --project-ref iflsleexexdgakvicqij
+```
+
+`supabase link`는 최초 1회만 실행하면 됩니다. 이후에는 `--linked` 플래그로 원격 DB에 쿼리할 수 있습니다.
+
+### 1. Supabase Auth에 사용자 생성
+
+아래 두 가지 방법 중 하나를 선택합니다.
+
+**방법 A: 팀원이 직접 가입 (권장)**
+
+팀원에게 대시보드 URL을 공유하면 됩니다:
+
+```
+https://elymas.github.io/claude-usage-dashboard/
+```
+
+팀원이 이메일을 입력하고 Magic Link로 로그인하면 `auth.users`에 자동으로 등록됩니다.
+
+**방법 B: 관리자가 CLI로 직접 생성**
+
+팀원이 직접 접속하기 어려운 경우 CLI로 사용자를 생성할 수 있습니다:
+
+```bash
+supabase auth admin create-user \
+  --email "팀원이메일@example.com" \
+  --email-confirm
+```
+
+> `--email-confirm` 플래그는 이메일 인증을 자동으로 완료 처리합니다.
+
+### 2. 사용자 등록 확인
+
+Auth에 사용자가 생성되었는지 확인합니다:
+
+```bash
 supabase db query --linked \
-  "INSERT INTO public.profiles (id, name) \
-   SELECT id, '팀원이름' FROM auth.users \
-   WHERE email = '팀원이메일@example.com' \
+  "SELECT id, email, created_at FROM auth.users WHERE email = '팀원이메일@example.com';"
+```
+
+출력 예시:
+
+```json
+{
+  "rows": [
+    {
+      "id": "a1b2c3d4-...",
+      "email": "팀원이메일@example.com",
+      "created_at": "2026-03-26T..."
+    }
+  ]
+}
+```
+
+### 3. profiles 테이블에 프로필 등록
+
+Auth 사용자의 ID를 profiles 테이블에 등록합니다. API Key가 자동 생성됩니다:
+
+```bash
+supabase db query --linked \
+  "INSERT INTO public.profiles (id, name)
+   SELECT id, '팀원이름'
+   FROM auth.users
+   WHERE email = '팀원이메일@example.com'
    RETURNING id, name, api_key;"
 ```
 
-### 3. 팀원에게 전달할 정보
+출력 예시:
 
-위 쿼리 결과에서 아래 3가지를 팀원에게 공유:
+```json
+{
+  "rows": [
+    {
+      "id": "a1b2c3d4-...",
+      "name": "홍길동",
+      "api_key": "f5e6d7c8-..."
+    }
+  ]
+}
+```
 
-- **User ID**: `id` 값
-- **API Key**: `api_key` 값 (자동 생성된 UUID)
-- **Supabase URL**: `https://iflsleexexdgakvicqij.supabase.co`
+### 4. 팀원에게 전달할 정보
 
-팀원은 이 정보로 [설치](#설치) 섹션을 따라 진행하면 됩니다.
+위 결과에서 아래 3가지를 팀원에게 공유합니다:
+
+| 항목 | 값 | 용도 |
+|------|-----|------|
+| **User ID** | `id` 값 (예: `a1b2c3d4-...`) | Collector 식별용 |
+| **API Key** | `api_key` 값 (예: `f5e6d7c8-...`) | Collector → Edge Function 인증 |
+| **Supabase URL** | `https://iflsleexexdgakvicqij.supabase.co` | API 엔드포인트 |
+
+팀원은 이 정보로 본 가이드의 [설치](#설치) 섹션을 따라 진행하면 됩니다.
+
+### 5. 등록된 팀원 목록 확인
+
+전체 등록 현황을 확인하려면:
+
+```bash
+supabase db query --linked \
+  "SELECT p.name, u.email, p.created_at
+   FROM public.profiles p
+   JOIN auth.users u ON p.id = u.id
+   ORDER BY p.created_at;"
+```
