@@ -3,7 +3,7 @@
 import { BarChart } from '@tremor/react';
 import type { DailyUsage, Profile } from '@usage-dashboard/shared';
 
-const COLORS = ['indigo', 'emerald', 'amber', 'rose'];
+const COLORS = ['indigo', 'emerald', 'amber', 'rose', 'cyan', 'violet', 'fuchsia', 'lime'];
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
