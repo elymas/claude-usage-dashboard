@@ -81,7 +81,7 @@ cd collector
 설치 스크립트가 다음을 수행합니다:
 - `~/.claude-collector/config.json` 생성 (User ID, API Key, Supabase URL)
 - 의존성 설치
-- macOS launchd 에이전트 등록 (매일 오전 9시 자동 실행)
+- macOS launchd 에이전트 등록 (매일 오전 10시 자동 실행)
 
 수동 실행:
 
@@ -147,7 +147,7 @@ pnpm --filter @usage-dashboard/collector test
 
 GitHub Actions (`.github/workflows/deploy.yml`)가 GitHub Pages로 자동 배포합니다:
 
-1. `main` 브랜치 push/PR 시 Collector 테스트 실행
+1. `master` 브랜치 push/PR 시 Collector 테스트 실행
 2. 테스트 통과 후 `next build` → 정적 파일(`dashboard/out/`) 생성 → GitHub Pages 배포
 
 ### GitHub Pages 설정
