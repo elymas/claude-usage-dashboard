@@ -120,7 +120,7 @@ cat > "$PLIST_PATH" << EOF
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key>
-    <integer>9</integer>
+    <integer>10</integer>
     <key>Minute</key>
     <integer>0</integer>
   </dict>
@@ -141,7 +141,7 @@ launchctl unload "$PLIST_PATH" 2>/dev/null || true
 launchctl load "$PLIST_PATH"
 
 info "launchd agent installed at $PLIST_PATH"
-info "Collector will run daily at 9:00 AM."
+info "Collector will run daily at 10:00 AM."
 echo ""
 echo "To run manually:  cd $SCRIPT_DIR && npx tsx src/index.ts"
 echo "To uninstall:     launchctl unload $PLIST_PATH && rm $PLIST_PATH"

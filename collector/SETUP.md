@@ -46,7 +46,7 @@ Supabase Project URL: <전달받은 Supabase URL>
 |------|------|
 | `~/.claude-collector/config.json` | 인증 설정 파일 생성 |
 | `~/.claude-collector/pending/` | 업로드 실패 시 재시도 큐 디렉토리 |
-| `~/Library/LaunchAgents/com.usage-dashboard.collector.plist` | macOS 자동 실행 에이전트 (매일 오전 9시) |
+| `~/Library/LaunchAgents/com.usage-dashboard.collector.plist` | macOS 자동 실행 에이전트 (매일 오전 10시) |
 
 ## 동작 확인
 
