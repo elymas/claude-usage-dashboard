@@ -7,7 +7,7 @@ import type { DailyUsage, Profile } from '@usage-dashboard/shared';
 const USER_COLORS = ['indigo', 'emerald', 'amber', 'rose', 'cyan', 'violet', 'fuchsia', 'lime'];
 const TOKEN_TYPE_COLORS = ['blue', 'orange'];
 
-type ViewMode = 'by-user' | 'by-type';
+type ViewMode = 'by-user' | 'by-type' | 'output';
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -59,6 +59,17 @@ export default function UsageChart({ usage, profiles }: Props) {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, tokens]) => ({ date: date.slice(5), ...tokens }));
 
+  // Output-only view: output tokens at their own scale
+  const outputDateMap = new Map<string, { Output: number }>();
+  usage.forEach((u) => {
+    const existing = outputDateMap.get(u.date) || { Output: 0 };
+    existing.Output += u.output_tokens;
+    outputDateMap.set(u.date, existing);
+  });
+  const outputChartData = Array.from(outputDateMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, tokens]) => ({ date: date.slice(5), ...tokens }));
+
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
@@ -69,6 +80,12 @@ export default function UsageChart({ usage, profiles }: Props) {
             className={`px-2.5 py-1 ${view === 'by-type' ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-500 hover:text-gray-700'} rounded-l-md`}
           >
             Input / Output
+          </button>
+          <button
+            onClick={() => setView('output')}
+            className={`px-2.5 py-1 ${view === 'output' ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Output only
           </button>
           <button
             onClick={() => setView('by-user')}
@@ -85,6 +102,16 @@ export default function UsageChart({ usage, profiles }: Props) {
           categories={userCategories}
           colors={USER_COLORS.slice(0, userCategories.length)}
           stack
+          className="h-72"
+          yAxisWidth={80}
+          valueFormatter={formatTokens}
+        />
+      ) : view === 'output' ? (
+        <BarChart
+          data={outputChartData}
+          index="date"
+          categories={['Output']}
+          colors={['orange']}
           className="h-72"
           yAxisWidth={80}
           valueFormatter={formatTokens}

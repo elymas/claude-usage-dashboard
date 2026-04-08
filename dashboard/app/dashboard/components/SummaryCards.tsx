@@ -29,8 +29,8 @@ export default function SummaryCards({ usage, profiles }: Props) {
   const activeUserIds = new Set(usage.map((u) => u.user_id));
   const activeUsers = activeUserIds.size;
 
-  const inputPct = totalTokens > 0 ? Math.round((totalInput / totalTokens) * 100) : 0;
-  const outputPct = totalTokens > 0 ? Math.round((totalOutput / totalTokens) * 100) : 0;
+  const inputPct = totalTokens > 0 ? ((totalInput / totalTokens) * 100).toFixed(1) : '0';
+  const outputPct = totalTokens > 0 ? ((totalOutput / totalTokens) * 100).toFixed(1) : '0';
 
   const uniqueDays = new Set(usage.map((u) => u.date)).size;
   const avgPerDay = activeUsers > 0 && uniqueDays > 0
