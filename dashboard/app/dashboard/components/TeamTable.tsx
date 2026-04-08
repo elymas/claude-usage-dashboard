@@ -29,6 +29,8 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
     {
       name: string;
       totalTokens: number;
+      inputTokens: number;
+      outputTokens: number;
       sessions: number;
       lastSync: string;
     }
@@ -42,6 +44,8 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
       userStats.set(row.user_id, {
         name,
         totalTokens: 0,
+        inputTokens: 0,
+        outputTokens: 0,
         sessions: 0,
         lastSync: row.synced_at,
       });
@@ -49,6 +53,8 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
 
     const stats = userStats.get(row.user_id)!;
     stats.totalTokens += row.total_tokens;
+    stats.inputTokens += row.input_tokens;
+    stats.outputTokens += row.output_tokens;
     stats.sessions += row.sessions;
 
     if (new Date(row.synced_at) > new Date(stats.lastSync)) {
@@ -69,8 +75,10 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
           <thead>
             <tr className="border-b border-gray-200 text-gray-500">
               <th className="pb-2 pr-4 font-medium">User</th>
-              <th className="pb-2 pr-4 font-medium">Period Tokens</th>
-              <th className="pb-2 pr-4 font-medium min-w-[160px]">Usage</th>
+              <th className="pb-2 pr-4 font-medium">Total</th>
+              <th className="pb-2 pr-4 font-medium">Input</th>
+              <th className="pb-2 pr-4 font-medium">Output</th>
+              <th className="pb-2 pr-4 font-medium min-w-[120px]">Usage</th>
               <th className="pb-2 pr-4 font-medium">Sessions</th>
               <th className="pb-2 font-medium">Last Sync</th>
             </tr>
@@ -94,6 +102,12 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
                   </td>
                   <td className="py-3 pr-4 tabular-nums text-gray-700">
                     {formatNumber(row.totalTokens)}
+                  </td>
+                  <td className="py-3 pr-4 tabular-nums text-gray-700">
+                    {formatNumber(row.inputTokens)}
+                  </td>
+                  <td className="py-3 pr-4 tabular-nums text-gray-700">
+                    {formatNumber(row.outputTokens)}
                   </td>
                   <td className="py-3 pr-4">
                     <div className="h-2 w-full rounded-full bg-gray-100">
@@ -123,7 +137,7 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
             {rows.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={7}
                   className="py-8 text-center text-gray-400"
                 >
                   No usage data for this period. Data will appear once collectors start syncing.

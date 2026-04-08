@@ -23,30 +23,22 @@ export default function SummaryCards({ usage, profiles }: Props) {
   }
 
   const totalTokens = usage.reduce((sum, u) => sum + u.total_tokens, 0);
+  const totalInput = usage.reduce((sum, u) => sum + u.input_tokens, 0);
+  const totalOutput = usage.reduce((sum, u) => sum + u.output_tokens, 0);
+  const totalCacheRead = usage.reduce((sum, u) => sum + u.cache_read_tokens, 0);
+  const totalCacheCreation = usage.reduce((sum, u) => sum + u.cache_creation_tokens, 0);
 
   const activeUserIds = new Set(usage.map((u) => u.user_id));
   const activeUsers = activeUserIds.size;
 
-  const modelTotals: Record<string, number> = {};
-  usage.forEach((u) => {
-    Object.entries(u.model_breakdown).forEach(([model, tokens]) => {
-      modelTotals[model] = (modelTotals[model] || 0) + (tokens as number);
-    });
-  });
-  const topModel = Object.entries(modelTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
-  const topModelShort = topModel.replace(/^claude-/, '').replace(/-\d{8}$/, '');
-
-  const uniqueDays = new Set(usage.map((u) => u.date)).size;
-  const avgPerPersonPerDay =
-    activeUsers > 0 && uniqueDays > 0
-      ? Math.round(totalTokens / activeUsers / uniqueDays)
-      : 0;
+  const inputPct = totalTokens > 0 ? Math.round((totalInput / totalTokens) * 100) : 0;
+  const outputPct = totalTokens > 0 ? Math.round((totalOutput / totalTokens) * 100) : 0;
 
   const metrics = [
-    { label: 'Total tokens', value: formatTokens(totalTokens) },
-    { label: 'Active users', value: `${activeUsers}/${profiles.length}` },
-    { label: 'Top model', value: topModelShort },
-    { label: 'Avg/person/day', value: formatTokens(avgPerPersonPerDay) },
+    { label: 'Total tokens', value: formatTokens(totalTokens), sub: `${activeUsers} users` },
+    { label: 'Input tokens', value: formatTokens(totalInput), sub: `${inputPct}%` },
+    { label: 'Output tokens', value: formatTokens(totalOutput), sub: `${outputPct}%` },
+    { label: 'Cache (read/create)', value: formatTokens(totalCacheRead), sub: `+${formatTokens(totalCacheCreation)} created` },
   ];
 
   return (
@@ -55,6 +47,7 @@ export default function SummaryCards({ usage, profiles }: Props) {
         <div key={m.label} className="flex-1 px-4 py-3">
           <p className="text-xs text-gray-500">{m.label}</p>
           <p className="mt-0.5 text-lg font-semibold text-gray-900 tabular-nums">{m.value}</p>
+          {m.sub && <p className="text-xs text-gray-400">{m.sub}</p>}
         </div>
       ))}
     </div>
