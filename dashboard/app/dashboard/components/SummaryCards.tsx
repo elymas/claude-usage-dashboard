@@ -23,10 +23,8 @@ export default function SummaryCards({ usage, profiles }: Props) {
   }
 
   const totalTokens = usage.reduce((sum, u) => sum + u.total_tokens, 0);
-  const totalInput = usage.reduce((sum, u) => sum + u.input_tokens, 0);
   const totalOutput = usage.reduce((sum, u) => sum + u.output_tokens, 0);
-  const totalCacheRead = usage.reduce((sum, u) => sum + u.cache_read_tokens, 0);
-  const totalCacheCreation = usage.reduce((sum, u) => sum + u.cache_creation_tokens, 0);
+  const totalInput = totalTokens - totalOutput;
 
   const activeUserIds = new Set(usage.map((u) => u.user_id));
   const activeUsers = activeUserIds.size;
@@ -34,11 +32,16 @@ export default function SummaryCards({ usage, profiles }: Props) {
   const inputPct = totalTokens > 0 ? Math.round((totalInput / totalTokens) * 100) : 0;
   const outputPct = totalTokens > 0 ? Math.round((totalOutput / totalTokens) * 100) : 0;
 
+  const uniqueDays = new Set(usage.map((u) => u.date)).size;
+  const avgPerDay = activeUsers > 0 && uniqueDays > 0
+    ? Math.round(totalTokens / activeUsers / uniqueDays)
+    : 0;
+
   const metrics = [
     { label: 'Total tokens', value: formatTokens(totalTokens), sub: `${activeUsers} users` },
-    { label: 'Input tokens', value: formatTokens(totalInput), sub: `${inputPct}%` },
+    { label: 'Input tokens', value: formatTokens(totalInput), sub: `${inputPct}% (incl. cache)` },
     { label: 'Output tokens', value: formatTokens(totalOutput), sub: `${outputPct}%` },
-    { label: 'Cache (read/create)', value: formatTokens(totalCacheRead), sub: `+${formatTokens(totalCacheCreation)} created` },
+    { label: 'Avg/person/day', value: formatTokens(avgPerDay), sub: `${uniqueDays} days` },
   ];
 
   return (

@@ -53,7 +53,7 @@ export function TeamTable({ usage, profiles }: TeamTableProps) {
 
     const stats = userStats.get(row.user_id)!;
     stats.totalTokens += row.total_tokens;
-    stats.inputTokens += row.input_tokens;
+    stats.inputTokens += row.input_tokens + row.cache_read_tokens + row.cache_creation_tokens;
     stats.outputTokens += row.output_tokens;
     stats.sessions += row.sessions;
 

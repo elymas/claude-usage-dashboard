@@ -5,7 +5,7 @@ import { BarChart } from '@tremor/react';
 import type { DailyUsage, Profile } from '@usage-dashboard/shared';
 
 const USER_COLORS = ['indigo', 'emerald', 'amber', 'rose', 'cyan', 'violet', 'fuchsia', 'lime'];
-const TOKEN_TYPE_COLORS = ['blue', 'orange', 'slate', 'zinc'];
+const TOKEN_TYPE_COLORS = ['blue', 'orange'];
 
 type ViewMode = 'by-user' | 'by-type';
 
@@ -46,15 +46,13 @@ export default function UsageChart({ usage, profiles }: Props) {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, users]) => ({ date: date.slice(5), ...users }));
 
-  // By-type view: input/output/cache per day
-  const typeCategories = ['Input', 'Output', 'Cache Read', 'Cache Creation'];
-  const typeDateMap = new Map<string, { Input: number; Output: number; 'Cache Read': number; 'Cache Creation': number }>();
+  // By-type view: input (incl. cache) vs output per day
+  const typeCategories = ['Input', 'Output'];
+  const typeDateMap = new Map<string, { Input: number; Output: number }>();
   usage.forEach((u) => {
-    const existing = typeDateMap.get(u.date) || { Input: 0, Output: 0, 'Cache Read': 0, 'Cache Creation': 0 };
-    existing.Input += u.input_tokens;
+    const existing = typeDateMap.get(u.date) || { Input: 0, Output: 0 };
+    existing.Input += u.input_tokens + u.cache_read_tokens + u.cache_creation_tokens;
     existing.Output += u.output_tokens;
-    existing['Cache Read'] += u.cache_read_tokens;
-    existing['Cache Creation'] += u.cache_creation_tokens;
     typeDateMap.set(u.date, existing);
   });
   const typeChartData = Array.from(typeDateMap.entries())
